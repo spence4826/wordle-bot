@@ -3,6 +3,7 @@ from discord import Embed, Colour
 from discord.ext import commands
 from discord.ext.commands import Bot
 
+import os
 from dotenv import load_dotenv
 
 intents = discord.Intents.default()
@@ -20,8 +21,12 @@ botDescription = 'Best bot that does nothing special.'
 helpCommand = commands.DefaultHelpCommand(no_category='Commands', LeaderboardCog='Commands')
 
 # Sets prefix for bot
-client = Bot(command_prefix=BOT_PREFIX, intents=intents, help_command=helpCommand, description=botDescription)
+client = Bot(command_prefix='.', intents=intents, help_command=helpCommand, description=botDescription)
 
+users = {}
+with open('leaderboard.txt') as file:
+    data = file.readline().split(' ')
+    users[data[0]] = int(data[1])
 
 # When client comes online
 @client.event
@@ -50,3 +55,24 @@ async def on_ready():
 
     print('done: started')
 
+# on every message
+@client.event
+async def on_message(ctx):
+    print(f'{ctx.author}: {ctx.content}')
+
+    if is_bot(ctx.author):  # Ignore if bot
+        return
+
+    if ctx.guild is None:  # Ignore if dm
+        return
+
+    if ctx.author.id not in users:
+        users[str(ctx.author.id)]: 0
+
+    if ctx.content[:6] == 'Wordle ':
+        data = ctx.content.split(' ')
+
+
+def is_bot(user):
+    if user.bot:
+        return True
